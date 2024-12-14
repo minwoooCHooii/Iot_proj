@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://openapi.seoul.go.kr:8088";
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY || "발급받은 API KEY를 입력하세요";
+const BASE_URL = process.env.BASE_URL || "http://openapi.seoul.go.kr:8088";
+const API_KEY = process.env.API_KEY || "발급받은 API KEY를 입력하세요";
 const SERVICE = "citydata";
 const START_INDEX = 1;
 const END_INDEX = 5;
@@ -25,7 +25,6 @@ const LOCATIONS: string[] = [
 
 const CHUNK_SIZE = 10; // 한 번에 실행할 최대 요청 수
 
-// 특정 장소에 대한 데이터 가져오기 함수
 const fetchLocationData = async (AREA_NM: string) => {
   const url = `/api/proxy?areaName=${encodeURIComponent(AREA_NM)}`;
   console.log(`🔗 실제 API 요청 URL: ${url}`);
@@ -38,7 +37,6 @@ const fetchLocationData = async (AREA_NM: string) => {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlData, "application/xml");
 
-    // XML 구조 디버깅용
     console.log(`🔎 ${AREA_NM} 파싱된 XML 구조:`, new XMLSerializer().serializeToString(xmlDoc));
 
     const livePopulationNode = xmlDoc.querySelector("LIVE_PPLTN_STTS");
@@ -89,22 +87,17 @@ const fetchLocationData = async (AREA_NM: string) => {
   }
 };
 
-
-// 청크 단위로 API 호출 실행 함수
 const fetchChunkedData = async (locations: string[], chunkSize: number) => {
   const results = [];
-
   for (let i = 0; i < locations.length; i += chunkSize) {
     const chunk = locations.slice(i, i + chunkSize);
     const chunkResults = await Promise.all(chunk.map(fetchLocationData));
     results.push(...chunkResults.filter((result) => result !== null));
     console.log(`✅ ${i + chunk.length}/${locations.length} 요청 완료`);
   }
-
   return results;
 };
 
-// 전체 인구 데이터 가져오기 함수
 export async function fetchPopulationData() {
   return await fetchChunkedData(LOCATIONS, CHUNK_SIZE);
 }
