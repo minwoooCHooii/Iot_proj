@@ -130,21 +130,21 @@ const CHUNK_SIZE = 10; // 한 번에 실행할 최대 요청 수
 
 // 특정 장소에 대한 데이터 가져오기 함수
 const fetchLocationData = async (AREA_NM: string) => {
-  // Next.js API 라우트로 요청
+  // Next.js API 라우트를 통해 요청
   const url = `/api/proxy?areaName=${encodeURIComponent(AREA_NM)}`;
-  console.log(`🔗 API 요청 URL: ${url}`);
+
+  console.log(`🔗 API 요청 URL 1 : ${url}`);
 
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(url); // Next.js API 라우트로 요청
     const xmlData = response.data;
 
-    // XML 데이터 파싱
+    // XML 데이터 파싱 로직은 그대로 유지
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlData, "application/xml");
 
     const livePopulationNode = xmlDoc.querySelector("LIVE_PPLTN_STTS");
     if (livePopulationNode) {
-      // 혼잡도 및 인구 데이터
       const populationRates = {
         "0대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_0")?.textContent || "0"),
         "10대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_10")?.textContent || "0"),
@@ -161,10 +161,9 @@ const fetchLocationData = async (AREA_NM: string) => {
         10
       );
 
-      // 위도와 경도 데이터
       const latitude = parseFloat(livePopulationNode.querySelector("LAT")?.textContent || "0");
       const longitude = parseFloat(livePopulationNode.querySelector("LNG")?.textContent || "0");
-      
+
       return {
         location: AREA_NM,
         latitude,
