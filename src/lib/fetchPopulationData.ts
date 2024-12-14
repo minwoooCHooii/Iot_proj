@@ -27,16 +27,19 @@ const CHUNK_SIZE = 10; // 한 번에 실행할 최대 요청 수
 
 // 특정 장소에 대한 데이터 가져오기 함수
 const fetchLocationData = async (AREA_NM: string) => {
-  // openapi.seoul.go.kr 대신 로컬 Next.js API 라우트 호출
   const url = `/api/proxy?areaName=${encodeURIComponent(AREA_NM)}`;
-
   console.log(`🔗 실제 API 요청 URL: ${url}`);
 
   try {
     const response = await axios.get(url);
+    console.log(`🔍 ${AREA_NM}의 전체 API 응답 데이터:`, response.data);
+
     const xmlData = response.data;
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlData, "application/xml");
+
+    // XML 구조 디버깅용
+    console.log(`🔎 ${AREA_NM} 파싱된 XML 구조:`, new XMLSerializer().serializeToString(xmlDoc));
 
     const livePopulationNode = xmlDoc.querySelector("LIVE_PPLTN_STTS");
     if (!livePopulationNode) {
@@ -85,6 +88,7 @@ const fetchLocationData = async (AREA_NM: string) => {
     };
   }
 };
+
 
 // 청크 단위로 API 호출 실행 함수
 const fetchChunkedData = async (locations: string[], chunkSize: number) => {
