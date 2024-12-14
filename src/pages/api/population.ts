@@ -57,7 +57,7 @@ export async function fetchPopulationData() {
         });
       }
     } catch (error) {
-      console.error(`Error fetching data for ${AREA_NM}:`, error.message);
+      console.error(`Error fetching data for ${AREA_NM}:`, (error as Error).message);
     }
   }
 

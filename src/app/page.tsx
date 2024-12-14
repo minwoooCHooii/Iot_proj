@@ -1,16 +1,26 @@
 'use client';
 
+// page.tsx
 import { useEffect, useState, useRef } from "react";
 import { fetchPopulationData } from "@/lib/fetchPopulationData";
 import { fetchWeatherData } from "@/lib/fetchWeatherData";
 import { fetchEventData } from "@/lib/fetchEventData";
+
 import WeatherCard from "@/app/components/WeatherCard";
 import EventCard from "@/app/components/EventCard";
 import Map from "@/app/components/Map";
-import { PopulationData, Event, LocationData } from "@/lib/types";
+
+interface Event {
+  eventName: string;
+  eventPlace: string;
+  eventPeriod: string;
+  thumbnail: string;
+  url: string;
+  coordinates: number[];
+}
 
 export default function HomePage() {
-  const [topLocations, setTopLocations] = useState<LocationData[]>([]);
+  const [topLocations, setTopLocations] = useState<any[]>([]);
   const [topEvents, setTopEvents] = useState<{ location: string; events: Event[] }[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +32,7 @@ export default function HomePage() {
       hasLoaded.current = true;
 
       try {
-        const populationData: PopulationData[] = await fetchPopulationData();
+        const populationData = await fetchPopulationData();
         const sortedLocations = populationData
           .sort((a, b) => b.totalPopulation - a.totalPopulation)
           .slice(0, 5);
@@ -36,19 +46,17 @@ export default function HomePage() {
         );
 
         setTopLocations(
-          weatherAndEvents.map((data) => {
-            const populationInfo = populationData.find((pop) => pop.location === data.location);
-            return {
-              location: data.location,
-              coordinates: [populationInfo?.latitude || 0, populationInfo?.longitude || 0],
-              totalPopulation: populationInfo?.totalPopulation || 0,
-              congestionLevel: (populationInfo?.totalPopulation || 0) > 1000 ? "붐빔" : "여유",
-              weather: data.weather,
-            };
-          })
+          weatherAndEvents.map((data) => ({
+            location: data.location,
+            totalPopulation:
+              populationData.find((pop) => pop.location === data.location)?.totalPopulation || 0,
+            weather: data.weather,
+          }))
         );
 
-        setTopEvents(removeDuplicateEvents(weatherAndEvents));
+        const uniqueEvents = removeDuplicateEvents(weatherAndEvents);
+
+        setTopEvents(uniqueEvents);
       } catch (error) {
         console.error("❌ 데이터 로드 실패:", error);
       } finally {
@@ -94,7 +102,7 @@ export default function HomePage() {
       </nav>
 
       <div style={{ padding: "20px" }}>
-        <Map data={topLocations} />
+        <Map data={[...topLocations, ...topEvents]} />
       </div>
 
       <h2 style={{ fontSize: "24px", marginBottom: "10px", textAlign: "center", color: "#000" }}>날씨 및 인구 정보</h2>
@@ -133,4 +141,3 @@ export default function HomePage() {
     </div>
   );
 }
-
