@@ -17,7 +17,7 @@ module.exports = {
     return [
       {
         source: '/api/:path*', // 프론트엔드 요청 경로
-        destination: 'http://your-insecure-api.com/:path*', // 백엔드 API 경로 (HTTP)
+        destination: 'http://openapi.seoul.go.kr:8088/:path*', // 실제 API 경로 (HTTP)
       },
     ];
   },
