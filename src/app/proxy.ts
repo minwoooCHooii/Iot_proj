@@ -16,6 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const url = `${BASE_URL}/${API_KEY}/xml/${SERVICE}/${START_INDEX}/${END_INDEX}/${encodeURIComponent(areaName)}`;
   try {
     const response = await axios.get(url);
+    console.log(url)
     res.status(200).send(response.data);
   } catch (error: any) {
     res.status(500).json({ error: "Failed to fetch data", details: error.message });
