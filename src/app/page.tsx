@@ -30,13 +30,16 @@ export default function HomePage() {
     async function loadData() {
       if (hasLoaded.current) return;
       hasLoaded.current = true;
-
+  
       try {
         const populationData = await fetchPopulationData();
+        console.log("🔍 populationData:", populationData);
+  
         const sortedLocations = populationData
-          .sort((a, b) => b.totalPopulation - a.totalPopulation)
+          .filter((location) => location?.totalPopulation !== undefined) // 유효한 데이터만
+          .sort((a, b) => (b.totalPopulation || 0) - (a.totalPopulation || 0)) // undefined 방지
           .slice(0, 5);
-
+  
         const weatherAndEvents = await Promise.all(
           sortedLocations.map(async (location) => {
             const weather = await fetchWeatherData(location.location).catch(() => null);
@@ -44,7 +47,7 @@ export default function HomePage() {
             return { location: location.location, weather, events };
           })
         );
-
+  
         setTopLocations(
           weatherAndEvents.map((data) => ({
             location: data.location,
@@ -53,9 +56,9 @@ export default function HomePage() {
             weather: data.weather,
           }))
         );
-
+  
         const uniqueEvents = removeDuplicateEvents(weatherAndEvents);
-
+  
         setTopEvents(uniqueEvents);
       } catch (error) {
         console.error("❌ 데이터 로드 실패:", error);
@@ -63,9 +66,10 @@ export default function HomePage() {
         setLoading(false);
       }
     }
-
+  
     loadData();
   }, []);
+  
 
   function removeDuplicateEvents(
     data: { location: string; events: Event[] }[]

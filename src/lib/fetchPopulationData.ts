@@ -130,54 +130,58 @@ const CHUNK_SIZE = 10; // 한 번에 실행할 최대 요청 수
 
 // 특정 장소에 대한 데이터 가져오기 함수
 const fetchLocationData = async (AREA_NM: string) => {
-  // Next.js API 라우트를 통해 요청
-  const url = `/api/proxy?areaName=${encodeURIComponent(AREA_NM)}`;
-
-  console.log(`🔗 API 요청 URL 1 : ${url}`);
+  const url = `${BASE_URL}/${API_KEY}/xml/${SERVICE}/${START_INDEX}/${END_INDEX}/${encodeURIComponent(AREA_NM)}`;
+  console.log(`🔗 API 요청 URL: ${url}`);
 
   try {
-    const response = await axios.get(url); // Next.js API 라우트로 요청
+    const response = await axios.get(url);
+    console.log("🔗 API 응답 데이터:", response.data); // 응답 데이터 출력
     const xmlData = response.data;
 
-    // XML 데이터 파싱 로직은 그대로 유지
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlData, "application/xml");
 
     const livePopulationNode = xmlDoc.querySelector("LIVE_PPLTN_STTS");
-    if (livePopulationNode) {
-      const populationRates = {
-        "0대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_0")?.textContent || "0"),
-        "10대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_10")?.textContent || "0"),
-        "20대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_20")?.textContent || "0"),
-        "30대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_30")?.textContent || "0"),
-        "40대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_40")?.textContent || "0"),
-        "50대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_50")?.textContent || "0"),
-        "60대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_60")?.textContent || "0"),
-        "70대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_70")?.textContent || "0"),
-      };
-
-      const totalPopulation = parseInt(
-        livePopulationNode.querySelector("AREA_PPLTN_MAX")?.textContent || "0",
-        10
-      );
-
-      const latitude = parseFloat(livePopulationNode.querySelector("LAT")?.textContent || "0");
-      const longitude = parseFloat(livePopulationNode.querySelector("LNG")?.textContent || "0");
-
+    if (!livePopulationNode) {
+      console.warn(`⚠️ ${AREA_NM} 데이터 없음: LIVE_PPLTN_STTS 태그 없음`);
       return {
         location: AREA_NM,
-        latitude,
-        longitude,
-        populationRates,
-        totalPopulation,
+        message: "해당 지역에 실시간 인구 데이터가 제공되지 않습니다.",
       };
-    } else {
-      console.error(`❌ ${AREA_NM} 처리 실패: LIVE_PPLTN_STTS 태그 없음`);
-      return null;
     }
+
+    const populationRates = {
+      "0대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_0")?.textContent || "0"),
+      "10대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_10")?.textContent || "0"),
+      "20대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_20")?.textContent || "0"),
+      "30대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_30")?.textContent || "0"),
+      "40대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_40")?.textContent || "0"),
+      "50대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_50")?.textContent || "0"),
+      "60대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_60")?.textContent || "0"),
+      "70대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_70")?.textContent || "0"),
+    };
+
+    const totalPopulation = parseInt(
+      livePopulationNode.querySelector("AREA_PPLTN_MAX")?.textContent || "0",
+      10
+    );
+
+    const latitude = parseFloat(livePopulationNode.querySelector("LAT")?.textContent || "0");
+    const longitude = parseFloat(livePopulationNode.querySelector("LNG")?.textContent || "0");
+
+    return {
+      location: AREA_NM,
+      latitude,
+      longitude,
+      populationRates,
+      totalPopulation,
+    };
   } catch (error) {
     console.error(`❌ ${AREA_NM} 요청 실패:`, error);
-    return null;
+    return {
+      location: AREA_NM,
+      message: "데이터를 가져오는 중 오류가 발생했습니다.",
+    };
   }
 };
 
