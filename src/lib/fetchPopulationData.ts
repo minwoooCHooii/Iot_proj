@@ -130,13 +130,15 @@ const CHUNK_SIZE = 10; // 한 번에 실행할 최대 요청 수
 
 // 특정 장소에 대한 데이터 가져오기 함수
 const fetchLocationData = async (AREA_NM: string) => {
-  const url = `${BASE_URL}/${API_KEY}/xml/${SERVICE}/${START_INDEX}/${END_INDEX}/${AREA_NM}`;
+  // Next.js API 라우트로 요청
+  const url = `/api/proxy?areaName=${encodeURIComponent(AREA_NM)}`;
   console.log(`🔗 API 요청 URL: ${url}`);
 
   try {
     const response = await axios.get(url);
     const xmlData = response.data;
 
+    // XML 데이터 파싱
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlData, "application/xml");
 
@@ -163,7 +165,6 @@ const fetchLocationData = async (AREA_NM: string) => {
       const latitude = parseFloat(livePopulationNode.querySelector("LAT")?.textContent || "0");
       const longitude = parseFloat(livePopulationNode.querySelector("LNG")?.textContent || "0");
       
-      
       return {
         location: AREA_NM,
         latitude,
@@ -180,6 +181,7 @@ const fetchLocationData = async (AREA_NM: string) => {
     return null;
   }
 };
+
 
 // 청크 단위로 API 호출 실행 함수
 const fetchChunkedData = async (locations: string[], chunkSize: number) => {
