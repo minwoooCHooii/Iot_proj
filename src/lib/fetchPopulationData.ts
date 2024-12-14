@@ -131,25 +131,30 @@ const CHUNK_SIZE = 10; // 한 번에 실행할 최대 요청 수
 // 특정 장소에 대한 데이터 가져오기 함수
 const fetchLocationData = async (AREA_NM: string) => {
   const url = `${BASE_URL}/${API_KEY}/xml/${SERVICE}/${START_INDEX}/${END_INDEX}/${encodeURIComponent(AREA_NM)}`;
-  console.log(`🔗 API 요청 URL: ${url}`);
+  console.log(`🔗 실제 API 요청 URL: ${url}`);
 
   try {
     const response = await axios.get(url);
-    console.log("🔗 API 응답 데이터:", response.data); // 응답 데이터 출력
+
+    // API 응답 전체를 콘솔에 출력
+    console.log(`🔍 ${AREA_NM}의 전체 API 응답 데이터:`, response.data);
+
     const xmlData = response.data;
 
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlData, "application/xml");
 
+    // 특정 태그를 찾지 못하면 전체 구조를 보여줌
     const livePopulationNode = xmlDoc.querySelector("LIVE_PPLTN_STTS");
     if (!livePopulationNode) {
-      console.warn(`⚠️ ${AREA_NM} 데이터 없음: LIVE_PPLTN_STTS 태그 없음`);
+      console.warn(`⚠️ ${AREA_NM}: LIVE_PPLTN_STTS 태그가 없습니다. 응답 구조를 확인하세요.`);
       return {
         location: AREA_NM,
         message: "해당 지역에 실시간 인구 데이터가 제공되지 않습니다.",
       };
     }
 
+    // 데이터 처리 로직
     const populationRates = {
       "0대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_0")?.textContent || "0"),
       "10대": parseFloat(livePopulationNode.querySelector("PPLTN_RATE_10")?.textContent || "0"),
@@ -178,10 +183,7 @@ const fetchLocationData = async (AREA_NM: string) => {
     };
   } catch (error) {
     console.error(`❌ ${AREA_NM} 요청 실패:`, error);
-    return {
-      location: AREA_NM,
-      message: "데이터를 가져오는 중 오류가 발생했습니다.",
-    };
+    return null;
   }
 };
 
