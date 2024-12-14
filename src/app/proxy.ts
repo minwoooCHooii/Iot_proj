@@ -3,8 +3,17 @@ import { NextApiRequest, NextApiResponse } from "next";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { endpoint } = req.query;
 
-  const response = await fetch(`http://your-insecure-api.com/${endpoint}`);
-  const data = await response.json();
+  try {
+    const apiUrl = `https://your-secure-api.com/${endpoint}`; // HTTPS 사용
+    const response = await fetch(apiUrl);
 
-  res.status(200).json(data);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data from ${apiUrl}`);
+    }
+
+    const data = await response.json();
+    res.status(200).json(data);
+  }  catch (error: any) {
+    console.error(`Error fetching data: ${error.message}`);
+  }
 }
