@@ -1,11 +1,9 @@
 'use client';
 
-// page.tsx
 import { useEffect, useState, useRef } from "react";
 import { fetchPopulationData } from "@/lib/fetchPopulationData";
 import { fetchWeatherData } from "@/lib/fetchWeatherData";
 import { fetchEventData } from "@/lib/fetchEventData";
-
 import WeatherCard from "@/app/components/WeatherCard";
 import EventCard from "@/app/components/EventCard";
 import Map from "@/app/components/Map";
@@ -30,16 +28,15 @@ export default function HomePage() {
     async function loadData() {
       if (hasLoaded.current) return;
       hasLoaded.current = true;
-  
+
       try {
         const populationData = await fetchPopulationData();
-        console.log("🔍 populationData:", populationData);
-  
+
         const sortedLocations = populationData
-          .filter((location) => location?.totalPopulation !== undefined) // 유효한 데이터만
-          .sort((a, b) => (b.totalPopulation || 0) - (a.totalPopulation || 0)) // undefined 방지
+          .filter((location) => location?.totalPopulation !== undefined)
+          .sort((a, b) => (b.totalPopulation || 0) - (a.totalPopulation || 0))
           .slice(0, 5);
-  
+
         const weatherAndEvents = await Promise.all(
           sortedLocations.map(async (location) => {
             const weather = await fetchWeatherData(location.location).catch(() => null);
@@ -47,7 +44,7 @@ export default function HomePage() {
             return { location: location.location, weather, events };
           })
         );
-  
+
         setTopLocations(
           weatherAndEvents.map((data) => ({
             location: data.location,
@@ -56,9 +53,9 @@ export default function HomePage() {
             weather: data.weather,
           }))
         );
-  
+
+        // 중복 제거 후 이벤트 설정
         const uniqueEvents = removeDuplicateEvents(weatherAndEvents);
-  
         setTopEvents(uniqueEvents);
       } catch (error) {
         console.error("❌ 데이터 로드 실패:", error);
@@ -66,16 +63,18 @@ export default function HomePage() {
         setLoading(false);
       }
     }
-  
+
     loadData();
   }, []);
-  
 
   function removeDuplicateEvents(
     data: { location: string; events: Event[] }[]
   ): { location: string; events: Event[] }[] {
     const seenEvents = new Set<string>();
     return data.map((locationData) => {
+      if (!locationData.events || locationData.events.length === 0) {
+        return { location: locationData.location, events: [] };
+      }
       const uniqueEvents = locationData.events.filter((event) => {
         const eventKey = `${event.eventName}-${event.eventPlace}-${event.eventPeriod}`;
         if (seenEvents.has(eventKey)) return false;

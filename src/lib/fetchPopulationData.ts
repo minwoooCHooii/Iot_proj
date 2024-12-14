@@ -27,21 +27,21 @@ const CHUNK_SIZE = 10; // 한 번에 실행할 최대 요청 수
 
 const fetchLocationData = async (AREA_NM: string) => {
   const url = `/api/proxy?areaName=${encodeURIComponent(AREA_NM)}`;
-  console.log(`🔗 실제 API 요청 URL: ${url}`);
+  //console.log(`🔗 실제 API 요청 URL: ${url}`);
 
   try {
     const response = await axios.get(url);
-    console.log(`🔍 ${AREA_NM}의 전체 API 응답 데이터:`, response.data);
+    //console.log(`🔍 ${AREA_NM}의 전체 API 응답 데이터:`, response.data);
 
     const xmlData = response.data;
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlData, "application/xml");
 
-    console.log(`🔎 ${AREA_NM} 파싱된 XML 구조:`, new XMLSerializer().serializeToString(xmlDoc));
+    //console.log(`🔎 ${AREA_NM} 파싱된 XML 구조:`, new XMLSerializer().serializeToString(xmlDoc));
 
     const livePopulationNode = xmlDoc.querySelector("LIVE_PPLTN_STTS");
     if (!livePopulationNode) {
-      console.warn(`⚠️ ${AREA_NM}: LIVE_PPLTN_STTS 태그가 없습니다. 응답 구조를 확인하세요.`);
+      //console.warn(`⚠️ ${AREA_NM}: LIVE_PPLTN_STTS 태그가 없습니다. 응답 구조를 확인하세요.`);
       return {
         location: AREA_NM,
         latitude: 0,
