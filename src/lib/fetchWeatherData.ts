@@ -1,11 +1,7 @@
 import axios from "axios";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://openapi.seoul.go.kr:8088";
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY || "발급받은 API KEY를 입력하세요";
-const SERVICE = "citydata";
-
 export async function fetchWeatherData(location: string) {
-  const url = `${BASE_URL}/${API_KEY}/xml/${SERVICE}/1/5/${location}`;
+  const url = `/api/proxy?location=${encodeURIComponent(location)}`;
   console.log(`🌤️ 날씨 데이터 API 요청 URL: ${url}`);
 
   try {
@@ -34,11 +30,7 @@ export async function fetchWeatherData(location: string) {
 
     return weatherData;
   } catch (error) {
-    if (error instanceof Error) {
-      console.error(`❌ ${location} 날씨 데이터 요청 실패:`, error.message);
-    } else {
-      console.error(`❌ ${location} 알 수 없는 에러 발생:`, error);
-    }
+    console.error(`❌ ${location} 날씨 데이터 요청 실패:`, error);
     return null;
   }
 }

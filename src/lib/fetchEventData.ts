@@ -1,9 +1,5 @@
 import axios from "axios";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://openapi.seoul.go.kr:8088";
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY || "발급받은 API KEY를 입력하세요";
-const SERVICE = "citydata";
-
 // 요청 캐시
 const requestCache = new Map();
 
@@ -12,7 +8,7 @@ export async function fetchEventData(location: string) {
     return requestCache.get(location);
   }
 
-  const url = `${BASE_URL}/${API_KEY}/xml/${SERVICE}/1/5/${encodeURIComponent(location)}`;
+  const url = `/api/proxy?location=${encodeURIComponent(location)}`;
   console.log(`📊 이벤트 데이터 API 요청 URL: ${url}`);
 
   try {

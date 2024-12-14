@@ -13,12 +13,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const url = `${BASE_URL}/${API_KEY}/xml/citydata/1/5/${encodeURIComponent(location)}`;
+  console.log(`🔗 Proxy API 요청 URL: ${url}`);
 
   try {
     const response = await axios.get(url);
-    res.status(200).send(response.data); // 응답 데이터를 클라이언트에 전달
+    res.status(200).send(response.data); // API 데이터를 그대로 반환
   } catch (error) {
-    console.error(`❌ ${location} API 요청 실패:`, error);
+    console.error("❌ Proxy API 요청 실패:", error);
     res.status(500).json({ error: "Failed to fetch data from API" });
   }
 }
