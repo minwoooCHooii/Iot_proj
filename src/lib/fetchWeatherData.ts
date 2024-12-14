@@ -8,13 +8,24 @@ export async function fetchWeatherData(location: string) {
     const response = await axios.get(url);
     const xmlData = response.data;
 
+    console.log(`✅ ${location} 응답 데이터:`, xmlData); // 응답 데이터 출력
+
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlData, "application/xml");
 
     const weatherNode = xmlDoc.querySelector("WEATHER_STTS");
     if (!weatherNode) {
-      console.error(`❌ ${location} 날씨 데이터 없음`);
-      return null;
+      console.warn(`⚠️ ${location} 날씨 데이터 없음`);
+      return {
+        weatherStatus: "데이터 없음",
+        temp: 0,
+        sensibleTemp: 0,
+        maxTemp: 0,
+        minTemp: 0,
+        humidity: 0,
+        pm10: 0,
+        precipitation: "없음",
+      };
     }
 
     const weatherData = {
@@ -31,6 +42,15 @@ export async function fetchWeatherData(location: string) {
     return weatherData;
   } catch (error) {
     console.error(`❌ ${location} 날씨 데이터 요청 실패:`, error);
-    return null;
+    return {
+      weatherStatus: "요청 실패",
+      temp: 0,
+      sensibleTemp: 0,
+      maxTemp: 0,
+      minTemp: 0,
+      humidity: 0,
+      pm10: 0,
+      precipitation: "없음",
+    };
   }
 }

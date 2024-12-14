@@ -15,6 +15,8 @@ export async function fetchEventData(location: string) {
     const response = await axios.get(url);
     const xmlData = response.data;
 
+    console.log(`✅ ${location} 응답 데이터:`, xmlData); // 응답 데이터 출력
+
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlData, "application/xml");
     const eventNodes = xmlDoc.querySelectorAll("EVENT_STTS");
@@ -41,6 +43,6 @@ export async function fetchEventData(location: string) {
     return events;
   } catch (error) {
     console.error(`❌ ${location} 이벤트 데이터 요청 실패:`, error);
-    return [];
+    return []; // 기본값 반환
   }
 }
